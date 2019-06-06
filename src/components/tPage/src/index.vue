@@ -18,7 +18,6 @@
       </section>
     </UniversalLayout>
     <t-dialog ref="dialog"></t-dialog>
-    <!-- <div></div> -->
   </div>
 </template>
 
