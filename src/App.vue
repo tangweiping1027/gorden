@@ -16,7 +16,7 @@ export default {
     this.$ajax
       .post('http://120.79.124.232:8001/mock/36/logistic/forwarder/page', {})
       .then(data => {
-        // console.log(data)
+        console.log(data)
       })
   }
   // methods: {
