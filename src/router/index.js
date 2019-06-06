@@ -32,6 +32,7 @@ function formatNavSide(routes) {
     }
     arr.push(obj)
   })
+
   return arr
 }
 export const navSide = formatNavSide(routes.routes)

@@ -5,10 +5,20 @@
         <search :searchList="searchConfig" @search="handleSearch"></search>
       </section>
       <section slot="table">
-        <t-table :data="tableData"  @handleCurrentChange="handleCurrentChange" @handleSizeChange="handleSizeChange" v-loading="tableLoading" :columns="tableConfig" ref="table" v-bind="$attrs" v-on="$lintener"></t-table>
+        <t-table
+          :data="tableData"
+          @handleCurrentChange="handleCurrentChange"
+          @handleSizeChange="handleSizeChange"
+          v-loading="tableLoading"
+          :columns="tableConfig"
+          ref="table"
+          v-bind="$attrs"
+          v-on="$lintener"
+        ></t-table>
       </section>
     </UniversalLayout>
     <t-dialog ref="dialog"></t-dialog>
+    <!-- <div></div> -->
   </div>
 </template>
 
@@ -44,7 +54,7 @@ export default {
       searchInfo: {},
       tableLoading: true,
       pageNo: 1,
-      pageSize: 10,
+      pageSize: 10
     }
   },
   methods: {
@@ -96,7 +106,7 @@ export default {
           this.tableLoading = false
         })
     },
-    
+
     clearSelection() {
       this.$refs.table.toggleSelection()
     },
