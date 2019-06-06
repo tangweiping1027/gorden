@@ -10,7 +10,7 @@ export default {
     let vm = this
     return {
       config: {
-        url: '/',
+        url: null,
         btnConfig: [
           {
             name: '添加',

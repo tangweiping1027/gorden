@@ -13,7 +13,7 @@
           :columns="tableConfig"
           ref="table"
           v-bind="$attrs"
-          v-on="$lintener"
+          v-on="$listeners"
         ></t-table>
       </section>
     </UniversalLayout>
@@ -43,8 +43,9 @@ export default {
     }
   },
   data() {
+    let vm = this
     return {
-      ...config,
+      ...vm.config,
       tableData: [
         {
           remark: '1'
@@ -55,6 +56,9 @@ export default {
       pageNo: 1,
       pageSize: 10
     }
+  },
+  mounted() {
+    this.getList()
   },
   methods: {
     handleCurrentChange(val) {
