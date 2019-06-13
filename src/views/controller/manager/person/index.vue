@@ -69,6 +69,15 @@ export default {
         }
       }
     }
+  },
+  mounted() {
+    this.$refs.page.$dialog({
+      title: '添加',
+      width: '1000px',
+      visible: true,
+      cancelText: '预览',
+      component: () => import('./bbb')
+    })
   }
 }
 </script>

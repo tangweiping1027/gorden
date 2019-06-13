@@ -9,10 +9,12 @@
 <script>
 // let glob = window
 // import './aaa'
+import storage from 'Utils/storage'
 export default {
   name: 'app',
   mounted() {
-    console.log(this.glob)
+    let obj = undefined
+
     this.$ajax
       .post('http://120.79.124.232:8001/mock/36/logistic/forwarder/page', {})
       .then(data => {
@@ -20,7 +22,7 @@ export default {
       })
   }
   // methods: {
-  //   handleClick1() {
+  //   handleClick1() {\
   //     glob.alert(glob.getMessage())
   //   },
   //   handleClick2() {

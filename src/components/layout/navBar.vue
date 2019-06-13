@@ -44,11 +44,11 @@ export default {
     }
   },
   created() {
-    console.log(this.$attrs)
+    // console.log(this.$attrs)
   },
   methods: {
     handleSelect(key, keyPath) {
-      console.log(key, keyPath)
+      // console.log(key, keyPath)
     }
   }
 }
