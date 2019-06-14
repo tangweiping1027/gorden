@@ -16,10 +16,15 @@ export default {
             name: '添加',
             fn: () => {
               vm.$refs.page.$dialog({
-                title: '添加',
+                title: '添加1',
                 width: '500px',
                 visible: true,
-                cancelText: '预览',
+                footBtns: [
+                  {
+                    name: '预览',
+                    value: 'cancel'
+                  }
+                ],
                 component: () => import('./aaa'),
                 childFn: [
                   {
@@ -29,8 +34,13 @@ export default {
                     }
                   }
                 ],
-                submitForm(data) {
+                submit(data) {
                   console.log(data)
+                  // return Promise.resolve()
+                },
+                cancel(data) {
+                  console.log(data)
+                  // return Promise.resolve()
                 }
               })
             }

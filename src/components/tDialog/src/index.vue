@@ -1,33 +1,49 @@
 <template>
   <div class="dialog-com">
     <el-dialog
-      :title="options.title"
-      :visible.sync="options.visible"
+      :title="options.title || '添加'"
+      :visible.sync="options.visible || false"
       :width="options.width"
       @open="open"
       :append-to-body="true"
-      :fullscreen="options.fullscreen"
+      :fullscreen="options.fullscreen || false"
       center
     >
       <el-scrollbar
         wrap-class="default-scrollbar__wrap"
-        :style="{height:options.height}"
+        :style="{height:options.height || '100%'}"
         view-class="p20-scrollbar__view"
         ref="scroll"
       >
         <div>
           <component
             :is="options.component"
-            :reserveSelection="options.reserveSelection"
+            :reserveSelection="options.reserveSelection || 'id'"
             v-bind="$attrs"
             v-on="$listeners"
             :key="indexKey"
             ref="com"
           ></component>
-          <span slot="footer" class="dialog-footer" v-if="options.display">
-            <el-button size="small" @click="cancel">{{options.cancelText}}</el-button>
-            <el-button size="small" type="primary" @click="submitForm">{{options.submitText}}</el-button>
-          </span>
+          <template v-if="options.display == false ? false : true">
+            <span slot="footer" class="dialog-footer">
+              <!-- <el-button size="small" @click="handleSubmit('cancel')">{{options.cancelText || '取消'}}</el-button>
+            <el-button
+              :loading="loading"
+              size="small"
+              type="primary"
+              @click="handleSubmit('submit')"
+              >{{options.submitText || '保存'}}</el-button>-->
+              <template v-for="(item, index) in options.footBtns">
+                <el-button
+                  :loading="loading"
+                  size="small"
+                  type="primary"
+                  :key="index"
+                  @click="handleSubmit(`${item.value}`)"
+                >{{item.name || '保存'}}</el-button>
+              </template>
+            </span>
+          </template>
         </div>
       </el-scrollbar>
     </el-dialog>
@@ -36,6 +52,19 @@
 
 <script>
 export default {
+  props: {
+    listFlag: {
+      // 如果form中是表结构
+      type: Boolean,
+      default: false
+    },
+    titleList: {
+      type: Array,
+      default: () => {
+        return []
+      }
+    }
+  },
   name: 't-dialog',
   data() {
     return {
@@ -45,51 +74,76 @@ export default {
         width: '',
         height: '',
         component: '',
-        submitText: '',
         cancelText: '',
         submitText: '',
         display: true,
         submitForm: null,
         cancel: null
       },
-      indexKey: null
+      indexKey: null,
+      loading: false,
+      titleDefaultList: ['编辑', '添加', '删除'],
+      defaultBtns: [
+        {
+          name: '取消',
+          value: 'cancel'
+        },
+        {
+          name: '保存',
+          value: 'submit'
+        }
+      ]
     }
   },
   watch: {},
-  created() {},
+  created() {
+    if ($isArray(this.titleList) && this.titleList.length) {
+      this.titleDefaultList = [...this.titleDefaultList, ...this.titleList]
+    }
+  },
   methods: {
-    async $dialog({
-      title,
-      visible,
-      width,
-      component,
-      submitText,
-      cancelText,
-      childFn,
-      display,
-      height,
-      submitForm,
-      cancel,
-      fullscreen,
-      reserveSelection
-    }) {
+    async $dialog(params) {
       let vm = this
+
       vm.indexKey = Math.random()
+      let {
+        title,
+        visible,
+        width,
+        component,
+        submitText,
+        cancelText,
+        childFn,
+        display,
+        height,
+        submitForm,
+        cancel,
+        fullscreen,
+        reserveSelection,
+        footBtns
+      } = params
       try {
+        // await component().then(data => {
+        //   vm.options.reserveSelection = reserveSelection
+        //   vm.options.visible = visible || false
+        //   vm.options.width = width
+        //   vm.options.height = height || '100%'
+        //   vm.options.component = data.default
+        //   vm.options.title = title
+        //   vm.options.childFn = childFn
+        //   vm.options.fullscreen = fullscreen || false
+        //   vm.options.submitText = submitText || '保存'
+        //   vm.options.cancelText = cancelText || '取消'
+        //   vm.options.display = display == false ? false : true
+        //   vm.options.submitForm = submitForm || null
+        //   vm.options.cancel = cancel || null
+        // })
         await component().then(data => {
-          vm.options.reserveSelection = reserveSelection
-          vm.options.visible = visible || false
-          vm.options.width = width
-          vm.options.height = height || '100%'
+          vm.options = Object.assign({}, vm.options, params)
           vm.options.component = data.default
-          vm.options.title = title
-          vm.options.childFn = childFn
-          vm.options.fullscreen = fullscreen || false
-          vm.options.submitText = submitText || '保存'
-          vm.options.cancelText = cancelText || '取消'
-          vm.options.display = display == false ? false : true
-          vm.options.submitForm = submitForm || null
-          vm.options.cancel = cancel || null
+          vm.options.footBtns = footBtns
+            ? vm.$wipeRepet([...vm.defaultBtns, ...footBtns], 'value')
+            : vm.defaultBtns
         })
       } catch (error) {
         console.log(error)
@@ -98,6 +152,7 @@ export default {
     open() {
       let vm = this
       let childFn = this.options.childFn
+
       childFn ? childFn : []
       vm.$nextTick(() => {
         vm.$refs.com['resetForm'] && vm.$refs.com['resetForm']()
@@ -121,7 +176,7 @@ export default {
     getList(val) {
       this.$refs['com'].getList(val)
     },
-    submitForm() {
+    handleSubmit(submitName) {
       let vm = this
       if (vm.$refs.com.form && vm.$refs.com.$refs.form) {
         let data = vm.$clone(vm.$refs.com.form) // form表单的值
@@ -129,22 +184,60 @@ export default {
         form.validate(async valid => {
           if (valid) {
             try {
-              if (
-                vm.$refs.com.formatForm &&
-                $isFunction(vm.$refs.com.formatForm)
-              ) {
-                if (vm.$refs.com.formatForm(data)) {
-                  await vm.options.submitForm(vm.$refs.com.formatForm(data))
-                } else {
-                  await vm.options.submitForm(data)
-                }
-              } else {
-                await vm.options.submitForm(data)
+              vm.$refs.com.formatForm &&
+                $isFunction(vm.$refs.com.formatForm) &&
+                vm.$refs.com.formatForm(data) &&
+                (data = vm.$refs.com.formatForm(data))
+
+              vm.loading = true
+              // options.submitForm 为Promise对象
+              if (!vm.options[submitName]) {
+                // 如果submitForm 不存在，则直接关闭不做任何处理
+                console.warn(`options.${submitName}不存在`)
+                vm.loading = false
+                vm.options.visible = false
+                return
               }
+              vm.options[submitName](data)
+                .then(() => {
+                  vm.options.visible = false
+                  // 如果有loading 在此处理
+                  vm.loading = false
+
+                  // loading
+                  // 处理t-page表单
+                  if (vm.listFlag) {
+                    vm.titleDefaultList.forEach(element => {
+                      if (vm.options.title.indexOf(element) >= 0) {
+                        try {
+                          vm.$parent.getList &&
+                            $isFunction(vm.$parent.getList) &&
+                            vm.$parent.getList()
+                          if (element == '删除') {
+                            vm.$parent.clearSelection &&
+                              $isFunction(vm.$parent.clearSelection) &&
+                              vm.$parent.clearSelection()
+                          }
+                        } catch (error) {
+                          console.log(error)
+                        }
+                      }
+                    })
+                  }
+                })
+                .catch(() => {
+                  vm.loading = false
+                })
             } catch (error) {
-              console.log(error)
+              if (JSON.stringify(error).indexOf('then of undefined') >= -1) {
+                console.warn(`${submitName}不是一个Promise对象`)
+                // vm.options[submitName](data)
+                vm.loading = false
+                vm.options.visible = false
+              } else {
+                console.log(error)
+              }
             }
-            vm.options.visible = false
           } else {
             console.log('error')
           }
@@ -152,12 +245,6 @@ export default {
       } else {
         console.log('表单form不存在')
       }
-    },
-    async cancel() {
-      if (this.options.cancel) {
-        await this.options.cancel()
-      }
-      this.options.visible = false
     }
   }
 }
