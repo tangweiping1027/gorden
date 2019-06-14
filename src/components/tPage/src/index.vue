@@ -17,7 +17,7 @@
         ></t-table>
       </section>
     </UniversalLayout>
-    <t-dialog ref="dialog"></t-dialog>
+    <t-dialog ref="dialog" v-bind="$attrs" v-on="$listeners"></t-dialog>
   </div>
 </template>
 

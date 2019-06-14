@@ -16,7 +16,14 @@
         ref="scroll"
       >
         <div>
-          <component :is="options.component" :reserveSelection="options.reserveSelection" :key="indexKey" ref="com"></component>
+          <component
+            :is="options.component"
+            :reserveSelection="options.reserveSelection"
+            v-bind="$attrs"
+            v-on="$listeners"
+            :key="indexKey"
+            ref="com"
+          ></component>
           <span slot="footer" class="dialog-footer" v-if="options.display">
             <el-button size="small" @click="cancel">{{options.cancelText}}</el-button>
             <el-button size="small" type="primary" @click="submitForm">{{options.submitText}}</el-button>
@@ -30,7 +37,6 @@
 <script>
 export default {
   name: 't-dialog',
-  props: {},
   data() {
     return {
       options: {
@@ -50,6 +56,7 @@ export default {
     }
   },
   watch: {},
+  created() {},
   methods: {
     async $dialog({
       title,
@@ -68,21 +75,25 @@ export default {
     }) {
       let vm = this
       vm.indexKey = Math.random()
-      await component().then(data => {
-        vm.options.reserveSelection = reserveSelection
-        vm.options.visible = visible || false
-        vm.options.width = width
-        vm.options.height = height || '100%'
-        vm.options.component = data.default
-        vm.options.title = title
-        vm.options.childFn = childFn
-        vm.options.fullscreen = fullscreen || false
-        vm.options.submitText = submitText || '保存'
-        vm.options.cancelText = cancelText || '取消'
-        vm.options.display = display == false ? false : true
-        vm.options.submitForm = submitForm || null
-        vm.options.cancel = cancel || null
-      })
+      try {
+        await component().then(data => {
+          vm.options.reserveSelection = reserveSelection
+          vm.options.visible = visible || false
+          vm.options.width = width
+          vm.options.height = height || '100%'
+          vm.options.component = data.default
+          vm.options.title = title
+          vm.options.childFn = childFn
+          vm.options.fullscreen = fullscreen || false
+          vm.options.submitText = submitText || '保存'
+          vm.options.cancelText = cancelText || '取消'
+          vm.options.display = display == false ? false : true
+          vm.options.submitForm = submitForm || null
+          vm.options.cancel = cancel || null
+        })
+      } catch (error) {
+        console.log(error)
+      }
     },
     open() {
       let vm = this
@@ -112,16 +123,35 @@ export default {
     },
     submitForm() {
       let vm = this
-      if (!vm.$refs.com || !vm.$refs.com['submitForm']) {
-        vm.options.visible = false
-        return
+      if (vm.$refs.com.form && vm.$refs.com.$refs.form) {
+        let data = vm.$clone(vm.$refs.com.form) // form表单的值
+        let form = vm.$refs.com.$refs.form // form 表单
+        form.validate(async valid => {
+          if (valid) {
+            try {
+              if (
+                vm.$refs.com.formatForm &&
+                $isFunction(vm.$refs.com.formatForm)
+              ) {
+                if (vm.$refs.com.formatForm(data)) {
+                  await vm.options.submitForm(vm.$refs.com.formatForm(data))
+                } else {
+                  await vm.options.submitForm(data)
+                }
+              } else {
+                await vm.options.submitForm(data)
+              }
+            } catch (error) {
+              console.log(error)
+            }
+            vm.options.visible = false
+          } else {
+            console.log('error')
+          }
+        })
+      } else {
+        console.log('表单form不存在')
       }
-      vm.$refs.com['submitForm'](async data => {
-        if (vm.options.submitForm) {
-          await vm.options.submitForm(data)
-        }
-        vm.options.visible = false
-      })
     },
     async cancel() {
       if (this.options.cancel) {

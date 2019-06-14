@@ -20,7 +20,18 @@ export default {
                 width: '500px',
                 visible: true,
                 cancelText: '预览',
-                component: () => import('./bbb')
+                component: () => import('./aaa'),
+                childFn: [
+                  {
+                    name: 'edit',
+                    params: {
+                      id: 2
+                    }
+                  }
+                ],
+                submitForm(data) {
+                  console.log(data)
+                }
               })
             }
           },
@@ -71,13 +82,16 @@ export default {
     }
   },
   mounted() {
-    this.$refs.page.$dialog({
-      title: '添加',
-      width: '1000px',
-      visible: true,
-      cancelText: '预览',
-      component: () => import('./bbb')
-    })
+    // this.$refs.page.$dialog({
+    //   title: '添加',
+    //   width: '1000px',
+    //   visible: true,
+    //   cancelText: '预览',
+    //   component: () => import('./aaa'),
+    //   submitForm(data) {
+    //     console.log(data)
+    //   }
+    // })
   }
 }
 </script>

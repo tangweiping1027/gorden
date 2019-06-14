@@ -1,5 +1,7 @@
 <template>
-  <div class="bbb">123421</div>
+  <div class="bbb">
+    <t-drag :json="json" :name="name" @save="saveJson"></t-drag>
+  </div>
 </template>
 
 <script>
