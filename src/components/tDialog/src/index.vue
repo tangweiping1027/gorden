@@ -2,7 +2,7 @@
   <div class="dialog-com">
     <el-dialog
       :title="options.title || '添加'"
-      :visible.sync="options.visible || false"
+      :visible.sync="options.visible"
       :width="options.width"
       @open="open"
       :append-to-body="true"
@@ -26,13 +26,6 @@
           ></component>
           <template v-if="options.display == false ? false : true">
             <span slot="footer" class="dialog-footer">
-              <!-- <el-button size="small" @click="handleSubmit('cancel')">{{options.cancelText || '取消'}}</el-button>
-            <el-button
-              :loading="loading"
-              size="small"
-              type="primary"
-              @click="handleSubmit('submit')"
-              >{{options.submitText || '保存'}}</el-button>-->
               <template v-for="(item, index) in options.footBtns">
                 <el-button
                   :loading="loading"
@@ -77,7 +70,7 @@ export default {
         cancelText: '',
         submitText: '',
         display: true,
-        submitForm: null,
+        submit: null,
         cancel: null
       },
       indexKey: null,

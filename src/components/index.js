@@ -5,6 +5,7 @@ import search from './search'
 import tPage from './tPage'
 import TDialog from './tDialog'
 import tDrag from './tDrag'
+import tFormItem from './tFormItem'
 
 Vue.use(TTable)
 Vue.use(UniversalLayout)
@@ -12,3 +13,4 @@ Vue.use(search)
 Vue.use(tPage)
 Vue.use(TDialog)
 Vue.use(tDrag)
+Vue.use(tFormItem)
