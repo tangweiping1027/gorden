@@ -7,30 +7,26 @@
 </template>
 
 <script>
-// let glob = window
-// import './aaa'
 import storage from 'Utils/storage'
 export default {
   name: 'app',
-  mounted() {
-    let obj = undefined
+  async mounted() {
+    // let obj = undefined
 
-    this.$ajax
-      .post('http://120.79.124.232:8001/mock/36/logistic/forwarder/page', {})
-      .then(data => {
-        console.log(data)
-      })
+    // this.$ajax
+    //   .post('http://120.79.124.232:8001/mock/36/logistic/forwarder/page', {})
+    //   .then(data => {
+    //     console.log(data)
+    //   })
+    let vm = this
+    await vm.$api['login/login']({
+      captcha: '1',
+      password: 'admin@123',
+      username: 'admin'
+    }).then(data => {
+      storage.set('login', data.rows.token)
+    })
   }
-  // methods: {
-  //   handleClick1() {\
-  //     glob.alert(glob.getMessage())
-  //   },
-  //   handleClick2() {
-  //     glob.JavaScriptInterface.tipMessage(data => {
-  //       glob.alert(data)
-  //     })
-  //   }
-  // }
 }
 </script>
 

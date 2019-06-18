@@ -5,6 +5,15 @@
       <t-form-item :value.sync="form.bbb" :list="list" type="checkbox" prop="bbb" label="新表单2"></t-form-item>
       <t-form-item :value.sync="form.ccc" :list="list" type="time" prop="bbb" label="新表单2">dfas</t-form-item>
       <t-form-item :value.sync="form.ddd" :list="list" type="multiple" prop="bbb" label="新表单2">是么</t-form-item>
+      <t-form-item
+        :value.sync="form.ddd"
+        :list="list"
+        type="textarea"
+        prop="bbb"
+        minRows="4"
+        maxRows="8"
+        label="新表单2"
+      >是么</t-form-item>
       <ElRow>
         <ElCol :span="12">
           <t-form-item :value.sync="form.ddd" label-width="0" :list="list" type="input" prop="bbb">预计</t-form-item>
@@ -38,7 +47,8 @@ export default {
     }
   },
   watch: {
-    aaa(val) {
+    form(val) {
+      console.log(GLOBAL)
       console.log(val)
     }
   },

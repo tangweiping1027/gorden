@@ -28,7 +28,20 @@
             <div v-if="item.btns">
               <template v-for="(j,idx) in item.btns">
                 <el-tooltip :content="j.name" placement="top" :open-delay="2" :key="idx">
-                  <i v-if="!j.render" @click="j.fn" class="normal-icon-btn" :class="j.icon ? j.icon : 'el-icon-edit'"></i>
+                  <i
+                    v-if="!j.render"
+                    @click="() => {
+                      if(!j.fn){
+                        window.console.warn('btns的item缺少fn函数')
+                        return
+                      }else {
+                        j.fn(scope.$index, scope.row)
+                      }
+                      
+                    }"
+                    class="normal-icon-btn"
+                    :class="j.icon ? j.icon : 'el-icon-edit'"
+                  ></i>
                   <div style="display: inline-block" v-else>
                     <custorm :item="j" :scope="scope"></custorm>
                   </div>
@@ -52,8 +65,21 @@
           <template slot-scope="scope">
             <div v-if="item.btns">
               <template v-for="(j,idx) in item.btns">
-                <el-tooltip :content="j.name" placement="top" :open-delay="2" :key="idx">
-                  <i v-if="!j.render" @click="j.fn" class="normal-icon-btn" :class="j.icon ? j.icon : ''"></i>
+                <el-tooltip :content="j.name || ''" placement="top" :open-delay="2" :key="idx">
+                  <i
+                    v-if="!j.render && j.fn"
+                    @click="() => {
+                      if(!j.fn){
+                        window.console.warn('btns的item缺少fn函数')
+                        return
+                      }else {
+                        j.fn(scope.$index, scope.row)
+                      }
+                      
+                    }"
+                    class="normal-icon-btn"
+                    :class="j.icon ? j.icon : ''"
+                  ></i>
                   <div style="display: inline-block" v-else>
                     <custorm :item="j" :scope="scope"></custorm>
                   </div>
@@ -360,7 +386,9 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      window: GLOBAL
+    }
   },
   methods: {
     handleSizeChange(val) {

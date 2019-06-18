@@ -14,6 +14,9 @@
           ref="table"
           v-bind="$attrs"
           v-on="$listeners"
+          :pageNo="pageNo"
+          :pageSize="pageSize"
+          :total="total"
         ></t-table>
       </section>
     </UniversalLayout>
@@ -37,7 +40,7 @@ export default {
             return val
           },
           clickBtn() {},
-          searchData() {}
+          moreParams: {}
         }
       }
     }
@@ -45,7 +48,21 @@ export default {
   data() {
     let vm = this
     return {
-      ...vm.config,
+      ...Object.assign(
+        {
+          url: '/',
+          btnConfig: [],
+          searchConfig: [],
+          tableConfig: [],
+          searchForm(val) {
+            return val
+          },
+          clickBtn() {},
+          moreParams: {}
+        },
+        {},
+        vm.config
+      ),
       tableData: [
         {
           remark: '1'
@@ -54,7 +71,8 @@ export default {
       searchInfo: {},
       tableLoading: true,
       pageNo: 1,
-      pageSize: 10
+      pageSize: 10,
+      total: 0
     }
   },
   mounted() {
@@ -73,8 +91,8 @@ export default {
       val = JSON.parse(JSON.stringify(val))
       this.pageNo = 1
       this.searchInfo = val
-      this.clearSelection()
       this.getList('search')
+      this.clearSelection()
     },
     $dialog(options) {
       if (this.$refs['dialog'] && this.$refs['dialog'].$dialog) {
@@ -86,27 +104,27 @@ export default {
       let params = {
         pageSize: vm.pageSize,
         pageNumber: vm.pageNo,
-        sortOrder: 'asc'
+        sortOrder: 'asc',
+        ...vm.moreParams
       }
       if (type) {
-        let searchInfo = vm.searchData(vm.searchInfo) || {}
+        let searchInfo = vm.searchForm(vm.searchInfo) || {}
         params = Object.assign({}, params, searchInfo)
       }
       if (!this.url) {
         this.tableLoading = false
         return
       }
-
       vm.$api[vm.url](params)
         .then(({ pageNo, pageSize, total, rows = [] }) => {
-          this.pageNo = pageNo
-          this.pageSize = pageSize
-          this.total = total
-          this.tableData = rows
-          this.tableLoading = false
+          vm.pageNo = pageNo
+          vm.pageSize = pageSize
+          vm.total = total
+          vm.tableData = rows
+          vm.tableLoading = false
         })
         .catch(() => {
-          this.tableLoading = false
+          vm.tableLoading = false
         })
     },
 

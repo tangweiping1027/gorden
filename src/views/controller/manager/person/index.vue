@@ -10,7 +10,11 @@ export default {
     let vm = this
     return {
       config: {
-        url: null,
+        url: 'email/emailBasePage',
+        moreParams: {
+          platformId: 1,
+          emailType: 1
+        },
         btnConfig: [
           {
             name: '添加',
@@ -68,21 +72,52 @@ export default {
         ],
         tableConfig: [
           {
-            label: '备注',
-            value: 'remark'
-          },
-          {
-            label: '管理员',
-            value: 'manager'
-          },
-          {
             label: '操作',
             btns: [
               {
-                label: '删除',
-                fn: () => {}
+                name: '删除',
+                icon: 'el-icon-delete',
+                fn(index, row) {
+                  console.log(index, row)
+                }
               }
             ]
+          },
+          {
+            label: '回复状态',
+            value: 'replyTypeName',
+            width: '70'
+          },
+          {
+            label: '客户',
+            value: 'customerName',
+            mult: [
+              {
+                label: '邮箱',
+                value: 'customerEmailBox'
+              },
+              {
+                label: '订单号',
+                value: 'orderNumSystem'
+              }
+            ]
+          },
+
+          {
+            label: '订单来源店铺',
+            value: 'storeName'
+          },
+          {
+            label: '收取时间',
+            value: 'receiveTime'
+          },
+          {
+            label: '回复时间',
+            value: 'replyTime'
+          },
+          {
+            label: '客服人员',
+            value: 'serviceName'
           }
         ],
         clickBtn(val) {

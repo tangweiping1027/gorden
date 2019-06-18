@@ -63,6 +63,7 @@
           <el-checkbox v-for="(item, index) in list" :key="index" :label="item.value">{{item.label}}</el-checkbox>
         </el-checkbox-group>
       </template>
+      <!-- radio -->
       <template v-else-if="type == 'radio'">
         <el-radio-group style="width: 100%;margin-top:8px" v-model="vals" v-bind="$attrs" v-on="$listeners">
           <el-radio v-for="(item, index) in list" :key="index" :label="item.value">{{item.label}}</el-radio>

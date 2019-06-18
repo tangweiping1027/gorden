@@ -11,5 +11,7 @@ module.exports = {
     config.resolve.alias.set('Utils', resolve('src/utils'))
     config.resolve.alias.set('Plugins', resolve('src/plugins'))
     config.resolve.alias.set('Router', resolve('src/router'))
+    config.resolve.alias.set('Service', resolve('src/service'))
+    config.resolve.alias.set('Config', resolve('src/config'))
   }
 }

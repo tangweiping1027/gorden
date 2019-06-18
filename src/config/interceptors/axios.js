@@ -1,14 +1,19 @@
 import axios from 'axios'
-
+import storage from 'Utils/storage'
 let CancelToken = axios.CancelToken
 let pending = []
 let removePending = config => {
   for (const p in pending) {
     if (pending.hasOwnProperty(p)) {
       const item = pending[p]
-      if (item.u === config.url + '&' + config.method) {
+      if (!config) {
         item.f()
         pending.splice(p, 1)
+      } else {
+        if (item.u === config.url + '&' + config.method) {
+          item.f()
+          pending.splice(p, 1)
+        }
       }
     }
   }
@@ -23,7 +28,7 @@ export const requestSuccessFn = function(config) {
     })
   })
   // 请求成功拦截
-  console.log(config)
+  config.headers.token = storage.get('login')
   return config
 }
 export const requestErrorFn = function(error) {
@@ -31,13 +36,20 @@ export const requestErrorFn = function(error) {
   return Promise.reject(error)
 }
 export const responceSuccessFn = function(responce) {
-  console.log(responce)
+  let resData = responce.data
+  let { code, msg, status } = resData
+  switch (code) {
+    case 0:
+      break
+
+    default:
+      break
+  }
   // 返回成功拦截
   removePending(responce.config)
   return responce.data
 }
 export const responceErrorFn = function(error) {
-  console.log(error)
   // 返回失败拦截
   return Promise.reject(error)
 }
