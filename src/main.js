@@ -9,7 +9,11 @@ import { router } from './router'
 import plugins from './plugins'
 import utils from './utils'
 import VueDND from 'awe-dnd'
+import yutoo from '@yutoo/yutoo'
+import myNpmUtils from 'my-npm-utils'
 
+myNpmUtils(Vue)
+Vue.use(yutoo)
 Vue.use(VueDND)
 Vue.use(ElementUI)
 Vue.use(plugins)

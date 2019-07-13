@@ -11,8 +11,8 @@
       ref="baseTable"
     >
       >
-      <el-table-column v-if="selection" type="selection" width="55" :reserve-selection="!!rowKey"></el-table-column>
-      <el-table-column v-if="serialNumber" type="index" width="55"></el-table-column>
+      <el-table-column v-if="selection" type="selection" width="50" :reserve-selection="!!rowKey"></el-table-column>
+      <el-table-column v-if="serialNumber" type="index" width="50"></el-table-column>
       <template v-for="(item,index) in columns">
         <!-- 自定义表单 -->
         <el-table-column
@@ -30,16 +30,9 @@
                 <el-tooltip :content="j.name" placement="top" :open-delay="2" :key="idx">
                   <i
                     v-if="!j.render"
-                    @click="() => {
-                      if(!j.fn){
-                        window.console.warn('btns的item缺少fn函数')
-                        return
-                      }else {
-                        j.fn(scope.$index, scope.row)
-                      }
-                      
-                    }"
+                    @click="handleClick(j, scope)"
                     class="normal-icon-btn"
+                    style="padding: 0 2px;"
                     :class="j.icon ? j.icon : 'el-icon-edit'"
                   ></i>
                   <div style="display: inline-block" v-else>
@@ -67,16 +60,8 @@
               <template v-for="(j,idx) in item.btns">
                 <el-tooltip :content="j.name || ''" placement="top" :open-delay="2" :key="idx">
                   <i
-                    v-if="!j.render && j.fn"
-                    @click="() => {
-                      if(!j.fn){
-                        window.console.warn('btns的item缺少fn函数')
-                        return
-                      }else {
-                        j.fn(scope.$index, scope.row)
-                      }
-                      
-                    }"
+                    v-if="!j.render"
+                    @click="handleClick(j, scope)"
                     class="normal-icon-btn"
                     :class="j.icon ? j.icon : ''"
                   ></i>
@@ -114,7 +99,7 @@
             <template v-if="item.type == 'img'">
               <el-tooltip v-if="scope.row[item.value]" placement="right" effect="light" :open-delay="2">
                 <div slot="content" v-if="scope.row[item.value]">
-                  <img :src="scope.row[item.value] || ''" width="auto" :height="item.bulkyHeight || 180">
+                  <img :src="scope.row[item.value] || ''" width="auto" :height="item.bulkyHeight || 180" />
                 </div>
                 <el-image
                   :style="item.style || {width: '62px',height: '52px'}"
@@ -402,9 +387,27 @@ export default {
     },
     load(tree, treeNode, resolve) {
       let vm = this
-      vm.$api[vm.lazyUrl](params).then(({ rows = [] }) => {
+      vm.$api[vm.lazyUrl]({}).then(({ rows = [] }) => {
         resolve(rows)
       })
+    },
+    handleClick(j, scope) {
+      let vm = this
+      if (!j.fn) {
+        window.console.warn('btns的item缺少fn函数')
+        return
+      } else {
+        if (j.name && j.name.indexOf('删除') >= 0) {
+          let params = j.fn(scope.$index, scope.row)
+          if (vm.utils.isArray(params) && params.length == 3) {
+            this.$emit('delete', ...params)
+          } else {
+            console.warn('fn返回的数据不是数组,或者数组长度不是3')
+          }
+        } else {
+          j.fn(scope.$index, scope.row)
+        }
+      }
     },
     toggleSelection(rows) {
       // 传值为选中，不传，则清除选项
@@ -426,6 +429,13 @@ export default {
   .normal-icon-btn {
     cursor: pointer;
     font-size: 20px;
+  }
+  .el-table--enable-row-transition .el-table__body td {
+    height: 65px;
+  }
+  .el-table--border th:first-child .cell,
+  .el-table--border td:first-child .cell {
+    padding-left: 18px;
   }
 }
 </style>

@@ -4,7 +4,7 @@
       <t-form-item :value.sync="form.aaa" :list="list" type="radio" prop="aaa" label="新表单"></t-form-item>dfas
       <t-form-item :value.sync="form.bbb" :list="list" type="checkbox" prop="bbb" label="新表单2"></t-form-item>
       <t-form-item :value.sync="form.ccc" :list="list" type="time" prop="bbb" label="新表单2">dfas</t-form-item>
-      <t-form-item :value.sync="form.ddd" :list="list" type="multiple" prop="bbb" label="新表单2">是么</t-form-item>
+      <t-form-item :value.sync="form.ggg" :list="list" type="multiple" prop="bbb" label="新表单2">是么</t-form-item>
       <t-form-item
         :value.sync="form.ddd"
         :list="list"
@@ -22,6 +22,8 @@
           <t-form-item :value.sync="form.ddd" label-width="0" :list="list" type="input" prop="bbb">到达</t-form-item>
         </ElCol>
       </ElRow>
+      <t-form-item :value.sync="form.eee" type="editor" prop="eee" label="新表单2"></t-form-item>
+      <t-form-item :value.sync="form.jjj" type="upload" prop="eee" label="新表单2"></t-form-item>
     </ElForm>
   </div>
 </template>
@@ -48,7 +50,6 @@ export default {
   },
   watch: {
     form(val) {
-      console.log(GLOBAL)
       console.log(val)
     }
   },

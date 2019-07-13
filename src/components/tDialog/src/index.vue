@@ -5,9 +5,10 @@
       :visible.sync="options.visible"
       :width="options.width"
       @open="open"
+      @close="close"
       :append-to-body="true"
       :fullscreen="options.fullscreen || false"
-      center
+      left
     >
       <el-scrollbar
         wrap-class="default-scrollbar__wrap"
@@ -44,7 +45,9 @@
 </template>
 
 <script>
+/* eslint-disable */
 export default {
+  name: 't-dialog',
   props: {
     listFlag: {
       // 如果form中是表结构
@@ -58,7 +61,6 @@ export default {
       }
     }
   },
-  name: 't-dialog',
   data() {
     return {
       options: {
@@ -75,7 +77,7 @@ export default {
       },
       indexKey: null,
       loading: false,
-      titleDefaultList: ['编辑', '添加', '删除'],
+      titleDefaultList: ['编辑', '添加'],
       defaultBtns: [
         {
           name: '取消',
@@ -90,7 +92,7 @@ export default {
   },
   watch: {},
   created() {
-    if ($isArray(this.titleList) && this.titleList.length) {
+    if (this.utils.isArray(this.titleList) && this.titleList.length) {
       this.titleDefaultList = [...this.titleDefaultList, ...this.titleList]
     }
   },
@@ -99,22 +101,7 @@ export default {
       let vm = this
 
       vm.indexKey = Math.random()
-      let {
-        title,
-        visible,
-        width,
-        component,
-        submitText,
-        cancelText,
-        childFn,
-        display,
-        height,
-        submitForm,
-        cancel,
-        fullscreen,
-        reserveSelection,
-        footBtns
-      } = params
+      let { component, footBtns } = vm.utils.clone(params)
       try {
         // await component().then(data => {
         //   vm.options.reserveSelection = reserveSelection
@@ -134,19 +121,26 @@ export default {
         await component().then(data => {
           vm.options = Object.assign({}, vm.options, params)
           vm.options.component = data.default
-          vm.options.footBtns = footBtns
-            ? vm.$wipeRepet([...vm.defaultBtns, ...footBtns], 'value')
-            : vm.defaultBtns
+          vm.options.footBtns = footBtns ? footBtns : vm.defaultBtns
+          // vm.options.footBtns = footBtns
+          //   ? vm.$wipeRepet([...vm.defaultBtns, ...footBtns], 'value')
+          //   : vm.defaultBtns
         })
       } catch (error) {
         console.log(error)
+      }
+    },
+    close() {
+      let vm = this
+      if (!vm.utils.isEmpty(vm.$refs.com.form)) {
+        vm.$refs.com.form = {}
       }
     },
     open() {
       let vm = this
       let childFn = this.options.childFn
 
-      childFn ? childFn : []
+      childFn = childFn ? childFn : []
       vm.$nextTick(() => {
         vm.$refs.com['resetForm'] && vm.$refs.com['resetForm']()
         if (childFn && childFn.length) {
@@ -167,7 +161,7 @@ export default {
       })
     },
     getList(val) {
-      this.$refs['com'].getList(val)
+      this.dialog.getList(val)
     },
     handleSubmit(submitName) {
       let vm = this
@@ -178,15 +172,16 @@ export default {
           if (valid) {
             try {
               vm.$refs.com.formatForm &&
-                $isFunction(vm.$refs.com.formatForm) &&
-                vm.$refs.com.formatForm(data) &&
+                vm.utils.isFunction(vm.$refs.com.formatForm) &&
                 (data = vm.$refs.com.formatForm(data))
-
-              vm.loading = true
-              // options.submitForm 为Promise对象
+              if (submitName != 'view') {
+                vm.loading = true
+              }
+              // options[submitName] 为Promise对象
               if (!vm.options[submitName]) {
-                // 如果submitForm 不存在，则直接关闭不做任何处理
-                console.warn(`options.${submitName}不存在`)
+                if (submitName != 'cancel') {
+                  console.warn(`options.${submitName}不存在`)
+                }
                 vm.loading = false
                 vm.options.visible = false
                 return
@@ -203,13 +198,12 @@ export default {
                     vm.titleDefaultList.forEach(element => {
                       if (vm.options.title.indexOf(element) >= 0) {
                         try {
-                          vm.$parent.getList &&
-                            $isFunction(vm.$parent.getList) &&
+                          if (
+                            vm.$parent.getList &&
+                            vm.utils.isFunction(vm.$parent.getList)
+                          ) {
                             vm.$parent.getList()
-                          if (element == '删除') {
-                            vm.$parent.clearSelection &&
-                              $isFunction(vm.$parent.clearSelection) &&
-                              vm.$parent.clearSelection()
+                            vm.$parent.clearSelection()
                           }
                         } catch (error) {
                           console.log(error)
@@ -232,12 +226,19 @@ export default {
               }
             }
           } else {
-            console.log('error')
+            if (submitName == 'cancel') {
+              vm.options.visible = false
+            }
           }
         })
       } else {
-        console.log('表单form不存在')
+        console.warn('表单form不存在')
+        vm.loading = false
+        vm.options.visible = false
       }
+    },
+    dialog(ref = 'com') {
+      return this.$refs[ref]
     }
   }
 }

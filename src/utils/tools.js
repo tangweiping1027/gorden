@@ -1,4 +1,5 @@
-window.$dataType = function(params) {
+import Vue from 'vue'
+Vue.prototype.$dataType = function(params) {
   if (params === null) {
     return 'Null'
   } else if (params === undefined) {
@@ -8,34 +9,34 @@ window.$dataType = function(params) {
   }
 }
 
-window.$isArray = function(params) {
-  return window.$dataType(params) == 'Array'
+Vue.prototype.$isArray = function(params) {
+  return this.$dataType(params) == 'Array'
 }
-window.$isObject = function(params) {
-  return window.$dataType(params) == 'Object'
+Vue.prototype.$isObject = function(params) {
+  return this.$dataType(params) == 'Object'
 }
-window.$isFunction = function(params) {
-  return window.$dataType(params) == 'Function'
+Vue.prototype.$isFunction = function(params) {
+  return this.$dataType(params) == 'Function'
 }
-window.$isNull = function(params) {
-  return window.$dataType(params) == 'Null'
+Vue.prototype.$isNull = function(params) {
+  return this.$dataType(params) == 'Null'
 }
-window.$isUndefined = function(params) {
-  return window.$dataType(params) == 'Undefined'
+Vue.prototype.$isUndefined = function(params) {
+  return this.$dataType(params) == 'Undefined'
 }
 
-window.$clone = function(params) {
+Vue.prototype.$clone = function(params) {
   return JSON.parse(JSON.stringify(params))
 }
 
-window.$isEmpty = function(params) {
-  if (window.$isObject(params)) {
+Vue.prototype.$isEmpty = function(params) {
+  if (this.$isObject(params)) {
     return Object.keys(params).length == 0
-  } else if (window.$isArray(params)) {
+  } else if (this.$isArray(params)) {
     return params.length == 0
   } else if (
-    window.$isNull(params) ||
-    window.$isUndefined(params) ||
+    this.$isNull(params) ||
+    this.$isUndefined(params) ||
     params == '' ||
     params != params
   ) {

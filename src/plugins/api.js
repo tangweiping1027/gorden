@@ -9,6 +9,8 @@ import {
   CONST_PORT_CONFIG,
   AJAX_MOCK_BASEURL
 } from 'Config'
+import Vue from 'vue'
+const vm = new Vue()
 const { strict } = API_DEFAULT_CONFIG
 
 class MakeApi {
@@ -67,7 +69,7 @@ class MakeApi {
       Object.defineProperty(this.api, `${namespace}${sep}${name}`, {
         value(outerParams, outerOtions) {
           // 处理参数
-          let _data = $isEmpty(outerParams)
+          let _data = vm.$isEmpty(outerParams)
             ? params
             : strict
             ? _pick(_assign({}, params, outerParams), Object.keys(params))

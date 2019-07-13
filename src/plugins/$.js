@@ -13,6 +13,43 @@ Vue.prototype.$wipeRepet = function(origin, value) {
   return Object.values(obj)
 }
 
+// 删除 确认 函数
+/**
+ * 删除 确认 函数
+ * url  arr 需要删除的项集合， key 主键ID
+ */
+Vue.prototype.$delete = function(url, arr, key) {
+  let vm = this
+  let params = {}
+
+  if (!vm.$isString(url) || !vm.$isArray(arr) || !vm.$isString(key)) {
+    console.warn('返回的需要删除的url：' + url)
+    console.warn('返回的处理数据：' + arr)
+    console.warn('返回的主键ID：' + key)
+    return Promise.reject()
+  }
+  if (vm.$editMsg(arr, false)) {
+    return Promise.reject()
+  }
+  params[key + 's'] = arr.map(item => item[key])
+  return vm
+    .$confirm('此操作将删除该文件, 是否继续?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    .then(() => {
+      return vm.$api[url](params)
+    })
+    .catch(() => {
+      vm.$message({
+        type: 'info',
+        message: '已取消删除'
+      })
+      return Promise.reject()
+    })
+}
+
 /**
  * options = [{
    value: 'transportTypeName',
@@ -89,6 +126,16 @@ Vue.prototype.$formValidate = options => {
               // url 验证
               str += `else if (!specialExp(value,'url')) {
                   callback(new Error('输入的url格式有误'))
+                }`
+            } else if (item.type && item.type == 'user') {
+              // user 验证
+              str += `else if (!specialExp(value,'user')) {
+                  callback(new Error('输入的用户名格式有误'))
+                }`
+            } else if (item.type && item.type == 'fax') {
+              // user 验证
+              str += `else if (!specialExp(value,'fax')) {
+                  callback(new Error('输入的用户名格式有误'))
                 }`
             } else if (item.type && item.type == 'user') {
               // user 验证
@@ -202,6 +249,8 @@ function specialExp(val, type, numType) {
     )
   } else if (type == 'user') {
     return /^[a-zA-Z0-9_\-\u4E00-\u9FA5]{4,16}$/.test(val)
+  } else if (type == 'fax') {
+    return /^(\d{3,4}-)?\d{7,8}$/.test(val)
   }
 }
 

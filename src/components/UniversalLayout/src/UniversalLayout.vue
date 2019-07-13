@@ -1,59 +1,74 @@
-<template lang="html">
-    <transition name="el-fade-in">
-        <div class="UniversalLayout" v-show="show">
+<template>
+  <transition name="el-fade-in">
+    <div class="UniversalLayout" v-show="show">
+      <!--  -->
+      <slot>
+        <header class="search">
+          <slot name="search"></slot>
+        </header>
+        <!--  -->
+        <section class="allbtn">
+          <slot name="allbtn">
+            <div class="btnList" v-if="btnList.length">
+              <template v-for="(i,index) in btnList">
+                <!--  -->
+                <template v-if="!i.hidden">
+                  <el-button
+                    class="margin10"
+                    style="margin-left:0"
+                    :size="i.size || 'small'"
+                    :type="i.type || 'primary'"
+                    :key="index"
+                    :icon="i.icon || null"
+                    :disabled="typeof i.disabled === 'function' ? !!i.disabled() : i.disabled"
+                    v-if="!i.hasOwnProperty('children')"
+                    @click="handleClick(i)"
+                  >{{i.name}}</el-button>
+                  <!-- 按鈕点击否有选项 -->
+                  <el-dropdown
+                    class="margin10"
+                    v-if="i.hasOwnProperty('children') && i.children.length"
+                    @command="clickBtn"
+                    :key="i.id"
+                  >
+                    <el-button :type="i.type || 'primary'" :size="i.size || 'small'">
+                      {{i.name}}
+                      <i class="el-icon-arrow-down el-icon--right"></i>
+                    </el-button>
 
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item v-for="(j) in i.children" :command="j.name" :key="j.name">{{j.name}}</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </template>
+              </template>
+            </div>
             <!--  -->
-            <slot>
-                <header :class=" isAmazon ? 'search1' : 'search'">
-                    <slot name="search"></slot>
-                </header>
-                <!--  -->
-                <section class="allbtn">
-                    <slot name="allbtn">
-                        <div class="btnList" v-if="btnList.length">
-                            <template v-for="(i,index) in btnList">
-                                <!--  -->
-                                <el-button
-                                    class="margin10"
-                                    :size="i.size || 'small'"
-                                    :type="i.type || 'primary'"
-                                    :key="index"
-                                    :icon="i.icon || null"
-                                    v-if="!i.hasOwnProperty('children')"
-                                    @click="i.fn && i.fn(i.name)">{{i.name}}</el-button>
-                                <!-- 按鈕点击否有选项 -->
-                                <el-dropdown
-                                    :key="index"
-                                    class="margin10"
-                                    v-if="i.hasOwnProperty('children') && i.children.length"
-                                    @command="clickBtn">
-                                    <el-button :type="i.type || 'primary'" :size="i.size || 'small'">
-                                      {{i.name}}
-                                      <i class="el-icon-arrow-down el-icon--right"></i>
-                                    </el-button>
-                                    <el-dropdown-menu slot="dropdown">
-                                        <el-dropdown-item v-for="(j,jindex) in i.children" :command="j.name" :key="jindex">{{j.name}}</el-dropdown-item>
-                                    </el-dropdown-menu>
-                                </el-dropdown>
-                            </template>
-                        </div>
-                        <!--  -->
-                        <div class="btnRight">
-                            <slot name="btnRight"></slot>
-                        </div>
-                    </slot>
-                </section>
-                <!--  -->
-                <section class="table">
-                   <slot name="table"></slot>
-                </section>
-                <!--  -->
-            </slot>
-            <!--  -->
-
-        </div>
-
-    </transition>
+            <div class="btnRight">
+              <slot name="btnRight"></slot>
+            </div>
+          </slot>
+        </section>
+        <!--  -->
+        <section class="table">
+          <slot name="table"></slot>
+        </section>
+        <!--  -->
+        <section v-if="pagination" class="pagination">
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pageNo"
+            :page-sizes="[10,30,60,80]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total"
+          ></el-pagination>
+        </section>
+      </slot>
+      <!--  -->
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -64,10 +79,6 @@ export default {
       type: Boolean,
       default: true
     },
-    isAmazon: {
-      type: Boolean,
-      default: false
-    },
     pageNo: Number,
     pageSize: Number,
     total: Number,
@@ -76,13 +87,12 @@ export default {
       default: () => [
         // {
         //     name:"添加",
-        //     value:'点击的是添加',
         //     size:'small',
-        //     type:'primary'
+        //     type:'primary',
+        //     fn(name){}
         // },
         // {
         //     name:"批量修改",
-        //     value:'点击的是批量修改',
         //     type:'success',
         //     children:[
         //         {
@@ -111,12 +121,27 @@ export default {
     handleCurrentChange(val) {
       this.$emit('handleCurrentChange', val)
     },
-    /* eslint-disable */
-    clickBtn(value, name) {
-      this.$emit('clickBtn', value, name)
+    clickBtn(value) {
+      this.$emit('clickBtn', value)
       // if (name) {
-      //     this.$emit(name, value)
+      //   this.$emit(name, value)
       // }
+    },
+    handleClick(i) {
+      let vm = this
+      if (i.fn) {
+        if (i.name.indexOf('删除') >= 0) {
+          // 删除特殊处理 fn返回值为[url,arr,key]，
+          let params = i.fn()
+          if (vm.utils.isArray(params) && params.length == 3) {
+            this.$emit('delete', ...params)
+          } else {
+            console.warn('fn返回的数据不是数组,或者数组长度不是3')
+          }
+        } else {
+          i.fn(i.name)
+        }
+      }
     }
   },
   mounted() {
@@ -147,10 +172,6 @@ $bgcolor: rgba(242, 242, 242, 1);
   .search {
     @extend .pad10;
     background: $bgcolor;
-    border-radius: 5px;
-  }
-  .search1 {
-    padding: 0px;
     border-radius: 5px;
   }
   .allbtn {

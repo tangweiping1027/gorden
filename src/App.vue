@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <router-view/>
+    <router-view />
     <!-- <ElButton type="primary" @click="handleClick1">按钮1</ElButton>
     <ElButton type="primary" @click="handleClick2">按钮2</ElButton>-->
   </div>
@@ -21,7 +21,7 @@ export default {
     let vm = this
     await vm.$api['login/login']({
       captcha: '1',
-      password: 'admin@123',
+      password: 'admin123!',
       username: 'admin'
     }).then(data => {
       storage.set('login', data.rows.token)

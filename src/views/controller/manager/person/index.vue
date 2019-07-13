@@ -11,9 +11,9 @@ export default {
     return {
       config: {
         url: 'email/emailBasePage',
+        selectData: [],
         moreParams: {
-          platformId: 1,
-          emailType: 1
+          platformId: 123
         },
         btnConfig: [
           {
@@ -21,14 +21,8 @@ export default {
             fn: () => {
               vm.$refs.page.$dialog({
                 title: '添加1',
-                width: '500px',
+                width: '1000px',
                 visible: true,
-                footBtns: [
-                  {
-                    name: '预览',
-                    value: 'cancel'
-                  }
-                ],
                 component: () => import('./aaa'),
                 childFn: [
                   {
@@ -40,11 +34,11 @@ export default {
                 ],
                 submit(data) {
                   console.log(data)
-                  // return Promise.resolve()
+                  return Promise.resolve()
                 },
                 cancel(data) {
                   console.log(data)
-                  // return Promise.resolve()
+                  return Promise.resolve()
                 }
               })
             }

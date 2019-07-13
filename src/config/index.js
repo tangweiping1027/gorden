@@ -9,6 +9,12 @@ export const CONST_PORT_CONFIG = {
 export const AJAX_MOCK_BASEURL =
   'https://dsn.apizza.net/mock/e26e944bd798cee485a8995090fbe611'
 
+// OSS配置
+export const OSS_CONFIG = {
+  // 簽名地址
+  signUrl: CONST_PORT_CONFIG.PRODUCT_URL + '/img/get/oss/signature'
+}
+
 // api 默认配置
 export const API_DEFAULT_CONFIG = {
   strict: false,

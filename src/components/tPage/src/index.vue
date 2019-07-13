@@ -1,14 +1,17 @@
 <template>
   <div class="t-page">
-    <UniversalLayout :btnList="btnConfig" @clickBtn="clickBtn">
+    <UniversalLayout :btnList="btnList" @delete="handleDelete" @clickBtn="clickBtn" :pagination="false">
       <section slot="search">
         <search :searchList="searchConfig" @search="handleSearch"></search>
       </section>
       <section slot="table">
         <t-table
           :data="tableData"
+          :border="true"
+          @delete="handleDelete"
           @handleCurrentChange="handleCurrentChange"
           @handleSizeChange="handleSizeChange"
+          @selectChange="selectChange"
           v-loading="tableLoading"
           :columns="tableConfig"
           ref="table"
@@ -25,6 +28,7 @@
 </template>
 
 <script>
+import { filter } from 'minimatch'
 export default {
   name: 'tPage',
   props: {
@@ -40,7 +44,8 @@ export default {
             return val
           },
           clickBtn() {},
-          moreParams: {}
+          moreParams: {},
+          selectData: []
         }
       }
     }
@@ -58,16 +63,13 @@ export default {
             return val
           },
           clickBtn() {},
-          moreParams: {}
+          moreParams: {},
+          selectData: []
         },
         {},
         vm.config
       ),
-      tableData: [
-        {
-          remark: '1'
-        }
-      ],
+      tableData: [],
       searchInfo: {},
       tableLoading: true,
       pageNo: 1,
@@ -77,6 +79,19 @@ export default {
   },
   mounted() {
     this.getList()
+  },
+  computed: {
+    btnList: {
+      get() {
+        let vm = this
+        // vm.btnConfig.forEach(item => {
+        //   if (item.name.indexOf('删除') >= 0) {
+        //     console.log(123213)
+        //   }
+        // })
+        return vm.btnConfig
+      }
+    }
   },
   methods: {
     handleCurrentChange(val) {
@@ -95,9 +110,9 @@ export default {
       this.clearSelection()
     },
     $dialog(options) {
-      if (this.$refs['dialog'] && this.$refs['dialog'].$dialog) {
-        this.$refs['dialog'].$dialog(options)
-      }
+      this.$refs.dialog &&
+        this.$refs.dialog.$dialog &&
+        this.$refs.dialog.$dialog(options)
     },
     getList(type) {
       let vm = this
@@ -108,31 +123,61 @@ export default {
         ...vm.moreParams
       }
       if (type) {
-        let searchInfo = vm.searchForm(vm.searchInfo) || {}
+        let searchInfo = JSON.parse(
+          JSON.stringify(vm.searchForm(vm.searchInfo) || {})
+        )
+        // 默认第一个时间为time
+        if (
+          searchInfo.time &&
+          vm.utils.isArray(searchInfo.time) &&
+          !vm.utils.isEmpty(searchInfo.time)
+        ) {
+          searchInfo.startTime = searchInfo.time[0]
+          searchInfo.endTime = searchInfo.time[1]
+          delete searchInfo.time
+        }
         params = Object.assign({}, params, searchInfo)
+        // 处理为空的情况
+        params = vm.utils.filterObj(params)
       }
       if (!this.url) {
         this.tableLoading = false
         return
       }
-      vm.$api[vm.url](params)
-        .then(({ pageNo, pageSize, total, rows = [] }) => {
-          vm.pageNo = pageNo
-          vm.pageSize = pageSize
-          vm.total = total
-          vm.tableData = rows
-          vm.tableLoading = false
-        })
-        .catch(() => {
-          vm.tableLoading = false
-        })
+      try {
+        vm.$api[vm.url](params)
+          .then(({ pageNo, pageSize, total, rows = [] }) => {
+            vm.pageNo = pageNo
+            vm.pageSize = pageSize
+            vm.total = total
+            vm.tableData = rows
+            vm.tableLoading = false
+          })
+          .catch(() => {
+            vm.tableLoading = false
+          })
+      } catch (error) {
+        vm.tableLoading = false
+        console.warn(error)
+      }
     },
-
+    handleDelete(...arg) {
+      this.$delete(...arg)
+        .then(() => {
+          this.clearSelection()
+          this.getList('search')
+        })
+        .catch(() => {})
+    },
     clearSelection() {
       this.$refs.table.toggleSelection()
     },
     choseSelection(row) {
       this.$refs.table.toggleSelection(row)
+    },
+    selectChange(val) {
+      this.selectData = val
+      this.config.selectData = val
     }
   }
 }

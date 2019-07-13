@@ -11,9 +11,14 @@ const routes = {
     {
       path: '/',
       name: '首页',
-      redirect: '/controller/email/inbox',
+      redirect: '/login',
       component: Layout,
       children: routerConfig
+    },
+    {
+      path: '/login',
+      name: '登录',
+      component: () => import('Components/layout/login.vue')
     }
   ]
 }
